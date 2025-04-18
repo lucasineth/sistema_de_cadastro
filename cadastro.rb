@@ -54,7 +54,7 @@ class SistemaCadastro
       novo_nome = gets.chomp
       usuario.nome = novo_nome unless novo_nome.empty?
 
-      print "Novo emnail (ou enter para manter '#{usuario.email}'): "
+      print "Novo email (ou enter para manter '#{usuario.email}'): "
       novo_email = gets.chomp
       usuario.email = novo_email unless novo_email.empty?
 
@@ -72,12 +72,17 @@ class SistemaCadastro
   def remover_usuario(nome)
     usuario = buscar_usuario(nome)
     if usuario
-      @usuarios.delete(Usuario)
+      @usuarios.delete(usuario)
       salvar_usuarios
       puts "Usuário '#{nome}' removido com sucesso!"
     else
       puts "Usuário '#{nome}' não encontrado"
     end
+  end
+
+  def salvar_usuarios
+    dados = @usuarios.map(&:to_h)
+    File.write(ARQUIVO, JSON.pretty_generate(dados))
   end
 
   def carregar_usuarios
@@ -93,11 +98,13 @@ end
 sistema = SistemaCadastro.new
 
 loop do 
-  puts "\n-=-=-=- Menu -=-=-=-"
+  puts "\n-=-=-=- Cadastro -=-=-=-"
   puts "1. Cadastro usuário"
   puts "2. Listar usuários"
   puts "3. Buscar usuário por nome"
-  puts "4. Sair"
+  puts "4. Editar Usuário"
+  puts "5. Remover usuário"
+  puts "6. Sair"
   puts "Escolha uma opção: "
   opcao = gets.chomp
 
@@ -116,8 +123,21 @@ loop do
   when "3"
     print "Digite o nome para buscar: "
     nome = gets.chomp
-    sistema.buscar_usuario(nome)
+    usuario = sistema.buscar_usuario(nome)
+    if usuario
+      usuario.exiber_dados
+    else
+      puts "Usuário não encontrado."
+    end
   when "4"
+    print "Digite o nome do usuário a ser aditado: "
+    nome = gets.chomp
+    sistema.editar_usuario(nome)
+  when "5"
+    print "Digite o nome do usuário a ser removido: "
+    nome = gets.chomp
+    sistema.remover_usuario(nome)
+  when "6"
     puts "Encerrando..."
     break
   else

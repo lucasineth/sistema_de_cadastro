@@ -1,4 +1,7 @@
 require 'json'
+require 'tty-prompt'
+
+prompt = TTY::Prompt.new
 
 class Usuario
   attr_accessor :nome, :email, :idade
@@ -52,6 +55,7 @@ class SistemaCadastro
     @usuarios << usuario
     salvar_usuarios
     puts "Usuário '#{usuario.nome}' cadastrado com sucesso!"
+    puts ""
   end
 
   def listar_usuarios
@@ -60,6 +64,7 @@ class SistemaCadastro
       puts "[#{i + 1}]"
       u.exiber_dados 
     end
+    puts ""
   end
 
   def buscar_usuario(nome)
@@ -117,54 +122,52 @@ end
 sistema = SistemaCadastro.new
 
 loop do 
-  puts "\n-=-=-=- Cadastro -=-=-=-"
-  puts "1. Cadastro usuário"
-  puts "2. Listar usuários"
-  puts "3. Buscar usuário por nome"
-  puts "4. Editar Usuário"
-  puts "5. Remover usuário"
-  puts "6. Sair"
-  puts "Escolha uma opção: "
-  opcao = gets.chomp
+  escolha = prompt.select("O que deseja fazer?", cycle: true)  do |menu|
+    menu.choice "Cadastro usuário", "1"
+    menu.choice "Listar usuários", "2"
+    menu.choice "Buscar usuário por nome", "3"
+    menu.choice "Editar Usuário", "4"
+    menu.choice "Remover usuário", "5"
+    menu.choice "Sair", "6"
+  end
 
-  case opcao
+  case escolha
   when "1"
-    print "Nome: "
-    nome = gets.chomp
-    print "Email: "
-    email = gets.chomp
-    print "Idade: "
-    idade = gets.chomp.to_i
+    nome = prompt.ask("Nome:")
+    email = prompt.ask("Email:")
+    idade = prompt.ask("Idade:", convert: :int)
+
     usuario = Usuario.new(nome, email, idade)
 
     if usuario.valido?
       sistema.adicionar_usuario(usuario)
     else
       puts "Cadastro cancelado por dados inválidos."
+      puts ""
     end
+
   when "2"
     sistema.listar_usuarios
+
   when "3"
-    print "Digite o nome para buscar: "
-    nome = gets.chomp
+    nome = prompt.ask("Digite o nome para buscar:")
     usuario = sistema.buscar_usuario(nome)
     if usuario
       usuario.exiber_dados
     else
       puts "Usuário não encontrado."
     end
+
   when "4"
-    print "Digite o nome do usuário a ser aditado: "
-    nome = gets.chomp
+    nome = prompt.ask("Digite o nome do usuário a ser aditado:")
     sistema.editar_usuario(nome)
+
   when "5"
-    print "Digite o nome do usuário a ser removido: "
-    nome = gets.chomp
+    nome = prompt.ask("Digite o nome do usuário a ser removido:")
     sistema.remover_usuario(nome)
+
   when "6"
     puts "Encerrando..."
     break
-  else
-    puts "Opção inválida!"
   end
 end

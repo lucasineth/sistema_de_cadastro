@@ -20,6 +20,25 @@ class Usuario
   def self.from_hash(hash)
     Usuario.new(hash["nome"], hash["email"], hash["idade"])
   end
+
+  def valido? 
+    if @nome.strip.empty? || @email.strip.empty?
+      puts "Erro: Nome e email são obrigatórios"
+      return false
+    end
+  
+    unless email.include?("@")
+      puts "Erro: email inválido."
+      return false
+    end 
+
+    if @idade <= 0
+      puts "Erro: idade deve ser um número positivo."
+      return false
+    end
+
+    true
+  end
 end
 
 class SistemaCadastro
@@ -117,7 +136,12 @@ loop do
     print "Idade: "
     idade = gets.chomp.to_i
     usuario = Usuario.new(nome, email, idade)
-    sistema.adicionar_usuario(usuario)
+
+    if usuario.valido?
+      sistema.adicionar_usuario(usuario)
+    else
+      puts "Cadastro cancelado por dados inválidos."
+    end
   when "2"
     sistema.listar_usuarios
   when "3"
